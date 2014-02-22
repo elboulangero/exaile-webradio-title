@@ -12,12 +12,14 @@ PERIOD = 10  # seconds
 
 _PLUGIN = None
 
-PLAYER_START_CALLBACKS = (
+
+
+PLAYBACK_START_CALLBACKS = (
         'playback_player_start',
         'playback_player_resume',
         )
 
-PLAYER_STOP_CALLBACKS = (
+PLAYBACK_STOP_CALLBACKS = (
         'playback_player_end',
         'playback_player_pause',
         )
@@ -33,18 +35,18 @@ def _enable(eventname, exaile, nothing):
 
     _PLUGIN = WebRadioTitlePlugin(exaile)
 
-    for signal in PLAYER_START_CALLBACKS:
-        event.add_callback(_PLUGIN.on_start, signal)
-    for signal in PLAYER_STOP_CALLBACKS:
-        event.add_callback(_PLUGIN.on_stop, signal)
+    for signal in PLAYBACK_START_CALLBACKS:
+        event.add_callback(_PLUGIN.on_playback_start, signal)
+    for signal in PLAYBACK_STOP_CALLBACKS:
+        event.add_callback(_PLUGIN.on_playback_stop, signal)
 
 def disable(exaile):
     global _PLUGIN
 
-    for signal in PLAYER_START_CALLBACKS:
-        event.remove_callback(_PLUGIN.on_start, signal)
-    for signal in PLAYER_STOP_CALLBACKS:
-        event.remove_callback(_PLUGIN.on_stop, signal)
+    for signal in PLAYBACK_START_CALLBACKS:
+        event.remove_callback(_PLUGIN.on_playback_start, signal)
+    for signal in PLAYBACK_STOP_CALLBACKS:
+        event.remove_callback(_PLUGIN.on_playback_stop, signal)
 
     _PLUGIN.stop()
  
@@ -60,9 +62,7 @@ class WebRadioTitlePlugin(object):
         logger.debug("")
         self.stop()
 
-
-
-    def on_start(self, type, object, data):
+    def on_playback_start(self, type, object, data):
         logger.debug("Type: " + type)
 
         # Stop
@@ -89,23 +89,20 @@ class WebRadioTitlePlugin(object):
                 return
         logger.debug("Current track does not match any webradio scrapper")
 
-    def on_stop(self, type, object, data):
+    def on_playback_stop(self, type, object, data):
         logger.debug("Type: " + type)
 
-        # Stop
         self.stop()
 
     def start(self, scrappercls, track):
         logger.debug("Start fetching titles")
 
-        # Start new scrapper
         self.scrapper = scrappercls(self, track)
         self.scrapper.start()
 
     def stop(self):
         logger.debug("Stop fetching titles")
 
-        # Stop current scrapper
         if self.scrapper:
             self.scrapper.stop()
             self.scrapper = None

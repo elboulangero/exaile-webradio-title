@@ -1,4 +1,4 @@
 Version='0.1.0'
 Authors=['Mathieu Leplatre <contact@mathieu-leplatre.info>', 'Elboulangero <elboulangero@gmail.com>']
 Name='Webradio Title'
-Description='Fetch song titles from webradio web pages (e.g. FIP radio)\n\nDepends: python-beautifulsoup'
+Description='Fetch song titles from webradio web pages (e.g. FIP radio)\n\nDepends: python-beautifulsoup, python-requests'
