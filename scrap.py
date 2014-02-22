@@ -191,4 +191,19 @@ class NovaScrapper(WebRadioScrapper):
         if tag_title:
             infos['title'] = str(tag_title.string).strip()
 
+        # Get more info about the current show
+        shows = jsdata.pop("shows")
+        if not shows:
+            return infos
+
+        # Program title
+        title = shows[0].pop("title")
+        if title:
+            infos['album'] += " - " + title
+
+        # Program diffusion time
+        diff_time = shows[0].pop("field_emission_diff_texte_value")
+        if diff_time:
+            infos['album'] += " (" + diff_time + ")"
+
         return infos
