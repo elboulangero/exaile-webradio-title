@@ -93,12 +93,23 @@ class FIPScrapper(WebRadioScrapper):
 
         infos = self.default_infos()
 
-        html = json.loads(data).pop("html")
+        if not data:
+            return infos
+
+        # Parse JSON
+        jsdata = json.loads(data)
+        if not jsdata:
+            return infos
+
+        # Get HTML stuff
+        html = jsdata.pop("html")
         if not html:
             return infos
-        html.replace('\n', '')
-        #logger.debug("html: " + html)
 
+        html.replace('\n', '')
+        #logger.debug("html: " + str(html))
+
+        # Parse HTML stuff
         soup = BeautifulSoup(html).find(attrs = { "class" : "direct-current" })
         if not soup:
             return infos
@@ -144,13 +155,28 @@ class NovaScrapper(WebRadioScrapper):
 
     def extract(self, data):
         infos = self.default_infos()
-        
-        html = json.loads(data).pop("track").pop("markup")
-        if not html:
-            return infos
-        html.replace('\n', '')
 
-        soup = BeautifulSoup(html)
+        if not data:
+            return infos
+
+        # Parse JSON
+        jsdata = json.loads(data)
+        if not jsdata:
+            return infos
+
+        # Dig for the HTML stuff
+        track = jsdata.pop("track")
+        if not track:
+            return infos
+        
+        markup = track.pop("markup")
+        if not markup:
+            return infos
+
+        markup.replace('\n', '')
+
+        # Parse HTML
+        soup = BeautifulSoup(markup)
         if not soup:
             return infos
 
