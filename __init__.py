@@ -3,12 +3,10 @@ import random
 
 from xl import player, event
 
-from scrap import FIPScrapper, NovaScrapper
+from scrap import FIPScrapper, NovaScrapper, GrenouilleScrapper
 
 import logging
 logger = logging.getLogger(__name__)
-
-PERIOD = 10  # seconds
 
 _PLUGIN = None
 
@@ -82,8 +80,8 @@ class WebRadioTitlePlugin(object):
         # Get URL
         url = track.get_loc_for_io()
         
-        # Look for a web scrapper that knows this url
-        for cls in [FIPScrapper, NovaScrapper]:
+        # Look for a web scrapper that knows this URL
+        for cls in [FIPScrapper, NovaScrapper, GrenouilleScrapper]:
             if cls.match(url):
                 self.start(cls, track)
                 return

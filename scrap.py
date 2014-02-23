@@ -218,3 +218,38 @@ class NovaScrapper(WebRadioScrapper):
         diff_time = shows[0].pop("field_emission_diff_texte_value")
         if diff_time:
             infos['album'] += " (" + diff_time + ")"
+
+
+
+class GrenouilleScrapper(WebRadioScrapper):
+    name = "Radio Grenouille"
+    uri = "http://live.radiogrenouille.com:80/live"
+    scrapuri = "http://www.radiogrenouille.com/wp-content/themes/radiogrenouille-new/cestpasse.php"
+    headers = {'Host': 'www.radiogrenouille.com',
+               'Referer': 'http://www.radiogrenouille.com/'}
+    period = 5
+    datatype = "json"
+
+    def __init__(self, *args, **kwargs):
+        super(GrenouilleScrapper, self).__init__(*args, **kwargs)
+
+    def extract(self, infos, jsdata):
+        current = jsdata[0]
+        if not current:
+            return
+
+        tag_artist = current.pop("artiste")
+        if tag_artist:
+            infos['artist'] = tag_artist
+
+        tag_title = current.pop("titre")
+        if tag_title:
+            infos['title'] = tag_title
+
+        tag_album = current.pop("album")
+        if tag_album:
+            infos['album'] = tag_album
+
+        label = current.pop("label")
+        if label:
+            infos['album'] += " " + label
