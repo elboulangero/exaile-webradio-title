@@ -1,5 +1,6 @@
 import sys
 import threading
+import HTMLParser # Python 3: HTMLParser becomes html.parser
 
 try:
     import requests
@@ -32,6 +33,7 @@ class WebRadioScrapper(threading.Thread):
         if not BeautifulSoup:
             logger.error("BeautifulSoup is not available")
             return
+        self.html_parser = HTMLParser.HTMLParser()
 
         logger.debug("-> Scrapping " + self.name);
         while not self._stopevent.isSet():
@@ -92,6 +94,8 @@ class WebRadioScrapper(threading.Thread):
             response = requests.get(self.scrapuri, headers=self.headers, timeout=5)
 #            logger.debug("resp header: " + str(sorted(response.headers.items())))
 #            logger.debug("req header: " + str(sorted(response.request.headers.items())))
+#            logger.debug("apparent encoding: " + str(response.apparent_encoding))
+#            logger.debug("encoding: " + str(response.encoding))
         except:
             logger.debug("Request error: " + str(sys.exc_info()[0]) + " on URI " + self.scrapuri)
             return None
@@ -105,17 +109,10 @@ class WebRadioScrapper(threading.Thread):
         raise NotImplementedError("Please implement that in the scrapper")
 
     def postprocess(self, infos):
-        # TODO: is that code really doing something ?
-        for k, v in infos.items():
-            v = v or ''
-            try:
-                u = v.decode('iso-8859-1')
-                v = u.encode('utf8')
-                v = unicode(v)
-            except UnicodeDecodeError:
-                pass
-            infos[k] = v.strip().title()
-        return infos
+        for key, value in infos.items():
+            # Escape HTML entities
+            value = self.html_parser.unescape(value)
+            infos[key] = value.strip()
 
 
 
@@ -148,15 +145,15 @@ class FIPScrapper(WebRadioScrapper):
 
         tag_artist = soup.find(attrs = { "class" : "artiste" })
         if tag_artist:
-            infos['artist'] = str(tag_artist.string).strip()
+            infos['artist'] = str(tag_artist.string)
 
         tag_title = soup.find(attrs = { "class" : "titre" })
         if tag_title:
-            infos['title'] = str(tag_title.string).strip()
+            infos['title'] = str(tag_title.string)
 
         tag_album = soup.find(attrs = { "class" : "album" })
         if tag_album:
-            infos['album'] = str(tag_album.string).strip()
+            infos['album'] = str(tag_album.string)
 
         tag_date = soup.find(attrs = { "class" : "annee" })
         if tag_date:
@@ -195,14 +192,13 @@ class NovaScrapper(WebRadioScrapper):
 
         tag_artist = soup.find(attrs = { "class" : "artist" })
         if tag_artist:
-            artist = tag_artist.string
-            if not artist:
-                artist = tag_artist.find('a').string
-            infos['artist'] = str(artist).strip()
+            if not tag_artist.string:
+                tag_artist = tag_artist.find('a')
+            infos['artist'] = str(tag_artist.string)
 
         tag_title = soup.find(attrs = { "class" : "title" })
         if tag_title:
-            infos['title'] = str(tag_title.string).strip()
+            infos['title'] = str(tag_title.string)
 
         # Get more info about the current show
         shows = jsdata.pop("shows")
