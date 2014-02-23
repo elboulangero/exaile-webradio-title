@@ -3,14 +3,14 @@ import random
 
 from xl import player, event
 
-from scrap import FIPScrapper, NovaScrapper, GrenouilleScrapper
+from scrap import ScrapperThread, FIPScrapper, NovaScrapper, GrenouilleScrapper
 
 import logging
 logger = logging.getLogger(__name__)
 
+
+
 _PLUGIN = None
-
-
 
 PLAYBACK_START_CALLBACKS = (
         'playback_player_start',
@@ -85,6 +85,7 @@ class WebRadioTitlePlugin(object):
             if cls.match(url):
                 self.start(cls, track)
                 return
+
         logger.debug("Current track does not match any webradio scrapper")
 
     def on_playback_stop(self, type, object, data):
@@ -95,7 +96,7 @@ class WebRadioTitlePlugin(object):
     def start(self, scrappercls, track):
         logger.debug("Start fetching titles")
 
-        self.scrapper = scrappercls(self, track)
+        self.scrapper = ScrapperThread(scrappercls, self, track)
         self.scrapper.start()
 
     def stop(self):
@@ -118,7 +119,7 @@ class WebRadioTitlePlugin(object):
             value = infos.get(tag)
             if value is not None:
                 track.set_tag_raw(tag, value)
-        track.set_tag_raw('__length', random.randint(180, 240))  # fake length
+        track.set_tag_raw('__length', random.randint(180, 240))  # Fake length
 
         # Trigger a notification
         if cause == 'updated':
