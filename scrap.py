@@ -67,7 +67,7 @@ class WebRadioScrapper(threading.Thread):
                 self.plugin.update_track('updated', self.track, self.infos)
 
             # Sleep until next request
-            self._stopevent.wait(10)
+            self._stopevent.wait(self.period)
 
         self.plugin.update_track('stopped', self.track, self.default_infos())
         logger.debug("-> Done with " + self.name);
@@ -89,7 +89,7 @@ class WebRadioScrapper(threading.Thread):
 
     def request(self):
         try:
-            response = requests.get(self.scrapuri, timeout=5)
+            response = requests.get(self.scrapuri, headers=self.headers, timeout=5)
 #            logger.debug("resp header: " + str(sorted(response.headers.items())))
 #            logger.debug("req header: " + str(sorted(response.request.headers.items())))
         except:
@@ -123,6 +123,9 @@ class FIPScrapper(WebRadioScrapper):
     name = "FIP Radio"
     uri = "http://mp3.live.tv-radio.com/fip/all/"
     scrapuri = "http://www.fipradio.fr/sites/default/files/direct-large.json"
+    headers = {'Host': 'www.fipradio.fr',
+               'Referer': 'http://www.fipradio.fr/'}
+    period = 45
     datatype = "json"
 
     def __init__(self, *args, **kwargs):
@@ -165,6 +168,9 @@ class NovaScrapper(WebRadioScrapper):
     name = "Radio Nova"
     uri = "http://broadcast.infomaniak.net:80/radionova"
     scrapuri = "http://www.novaplanet.com/radionova/ontheair"
+    headers = {'Host': 'www.novaplanet.com',
+               'Referer': 'http://www.novaplanet.com/radionova/player'}
+    period = 30
     datatype = "json"
 
     def __init__(self, *args, **kwargs):
