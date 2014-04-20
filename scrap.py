@@ -83,23 +83,31 @@ class ScrapperThread(threading.Thread):
         headers = self.scrapper.headers
         datatype = self.scrapper.datatype
 
-#            logger.debug("Starting request")
+#        logger.debug("Starting request")
 
         try:
             response = requests.get(uri, headers=headers, timeout=5)
-#            logger.debug("resp data: " + str(response.text))
-#            logger.debug("resp header: " + str(sorted(response.headers.items())))
-#            logger.debug("req header: " + str(sorted(response.request.headers.items())))
-#            logger.debug("apparent encoding: " + str(response.apparent_encoding))
-#            logger.debug("encoding: " + str(response.encoding))
         except:
             logger.debug("Request error: " + str(sys.exc_info()[0]) + " on URI " + uri)
             return None
 
+#        logger.debug("Finished request")
+#        logger.debug("req header: " + str(sorted(response.request.headers.items())))
+#        logger.debug("resp header: " + str(sorted(response.headers.items())))
+#        logger.debug("resp text: " + str(response.text))
+#        logger.debug("encoding: " + str(response.encoding))
+#        logger.debug("apparent encoding: " + str(response.apparent_encoding))
+
+        ret = None
         if datatype == "json":
-            return response.json()
+            try:
+                ret = response.json()
+            except:
+                logger.debug("JSON error: " + str(sys.exc_info()[0]) + " on URI " + uri)
         else:
-            return response.text
+            ret = response.text
+
+        return ret
 
     def postprocess(self, infos):
         for key, value in infos.items():
